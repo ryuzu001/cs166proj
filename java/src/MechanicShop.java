@@ -309,7 +309,31 @@ public class MechanicShop{
 	}
 	
 	public static void AddMechanic(MechanicShop esql){//2
-		
+		try{
+			System.out.println("Enter Mechanic first name: ");
+			String fname = in.readLine();
+			System.out.println("Enter Mechanic last name: ");
+			String lname = in.readLine();
+			System.out.println("Enter experience in years: ");
+			String years = in.readLine();
+			
+			String query = "INSERT INTO Mechanic(id,fname,lname,experience) ";
+			query += "Values ('";
+			query += "700";	// hard code id
+			query += "', ";
+			query += fname;
+			query += "', ";
+			query += lname;
+			query += "', ";
+			query += years;
+			query += ")";
+			
+			int queryout = esql.executeQuery(query);
+			System.out.println(queryout);
+		}
+		catch (Exception e) {
+			System.out.println("failed");
+		}
 	}
 	
 	public static void AddCar(MechanicShop esql){//3
