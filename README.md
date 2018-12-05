@@ -14,3 +14,6 @@ cd java
 
 
 // make sure to change arguments in run.sh
+
+Ryan does even
+Braeton does odds
