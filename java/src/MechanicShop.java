@@ -304,8 +304,61 @@ public class MechanicShop{
 		return input;
 	}//end readChoice
 	
+    public int customerID = 500;
+
 	public static void AddCustomer(MechanicShop esql){//1
-		
+	    try{
+		String query = "";
+
+		String fname = "";
+		String lname = "";
+		String phone = "";
+		String address = "";
+
+		System.out.print("\nEnter first name (MAX 32 CHAR): ");
+		String input = in.readLine();
+		while(input.length() > 32) {
+		    System.out.print("\nInvalid entry. Enter first name (MAX 32 CHAR): ");
+		    String input = in.readLine();
+		}
+		fname += input;
+
+		System.out.print("\nEnter last name (MAX 32 CHAR): ");
+		String input = in.readLine();
+		while(input.length() > 32) {
+		    System.out.print("\nInvalid entry. Enter last name (MAX 32 CHAR): ");
+		    String input = in.readLine();
+		}
+		lname += input;
+
+		System.out.print("\nEnter phone number (MAX 13 DIGITS): ");
+		String input = in.readLine();
+		while(input.length() > 13) {
+		    System.out.print("\nInvalid entry. Enter phone number (MAX 13 DIGITS): ");
+		    String input = in.readLine();
+		}
+		phone += input;
+
+		System.out.print("\nEnter address (MAX 256 CHAR): ");
+		String input = in.readLine();
+		while(input.length() > 256) {
+		    System.out.print("\nInvalid entry. Enter address (MAX 256 CHAR): ");
+		    String input = in.readLine();
+		}
+		address += input;
+
+		String id = Integer.toString(customerID);
+		customerID++;
+
+		query = "INSERT INTO Customer(id, fname, lname, phone, address) VALUES("
+		    + id + ", " + fname + ", " + lname + ", " + phone + ", " address + ");"; 
+
+		int queryOut = esql.executeQuery(query);
+		System.out.println(queryOut);
+
+	    }catch(Exception e){
+		System.err.println(e.getMessage());
+	    }
 	}
 	
 	public static void AddMechanic(MechanicShop esql){//2
