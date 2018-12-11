@@ -23,6 +23,10 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 /**
  * This class defines a simple embedded SQL utility class that is designed to
@@ -304,8 +308,35 @@ public class MechanicShop{
 		return input;
 	}//end readChoice
 	
-    // public int customerID = 500;
-
+    public static int mechanicID = 250;
+    public static int requestID = 30000;
+    public static int getRequestID(){
+		requestID++;
+		return requestID;
+	}
+	public static int getMechanicID(){
+		mechanicID++;
+		return mechanicID;
+	}
+	
+	public static boolean isInteger(String s) {
+      boolean isValidInteger = false;
+      try
+      {
+         Integer.parseInt(s);
+ 
+         // s is a valid integer
+ 
+         isValidInteger = true;
+      }
+      catch (NumberFormatException ex)
+      {
+         // s is not an integer
+      }
+ 
+      return isValidInteger;
+   }
+	
 	public static void AddCustomer(MechanicShop esql){//1
 	    try{
 
@@ -361,16 +392,32 @@ public class MechanicShop{
 	
 	public static void AddMechanic(MechanicShop esql){//2
 		try{
-			System.out.println("Enter Mechanic first name: ");
-			String fname = in.readLine();
-			System.out.println("Enter Mechanic last name: ");
-			String lname = in.readLine();
-			System.out.println("Enter experience in years: ");
-			String years = in.readLine();
+			System.out.print("Enter mechanic first name (MAX 32 CHAR): ");
+			String input = in.readLine();
+			while(input.length() > 32 || input.length() == 0) {
+				System.out.print("Invalid entry. Enter mechanic first name (MAX 32 CHAR): ");
+				input = in.readLine();
+			}
+			String fname = input;
 			
-			String query = "INSERT INTO Mechanic ";
-			query += "Values (";
-			query += "703";	// hard code id
+			System.out.print("Enter mechanic last name (MAX 32 CHAR): ");
+			input = in.readLine();
+			while(input.length() > 32 || input.length() == 0) {
+				System.out.print("Invalid entry. Enter mechanic last name (MAX 32 CHAR): ");
+				input = in.readLine();
+			}
+			String lname = input;
+			
+			System.out.print("Enter experience in years: ");
+			input = in.readLine();
+			while(input.length() == 0 || !isInteger(input)) {
+				System.out.print("Invalid entry. Enter experience in years: ");
+				input = in.readLine();
+			}
+			String years = input;
+			
+			String query = "INSERT INTO Mechanic Values (";
+			query += getMechanicID();
 			query += ", '";
 			query += fname;
 			query += "', '";
@@ -380,10 +427,8 @@ public class MechanicShop{
 			query += "')";
 			
 			esql.executeUpdate(query);
-			System.out.println("success!");
 		}
 		catch (Exception e) {
-			System.out.println("error");
 			System.err.println(e.getMessage());
 		}
 	}
@@ -393,7 +438,91 @@ public class MechanicShop{
 	}
 	
 	public static void InsertServiceRequest(MechanicShop esql){//4
-		
+		try{
+			System.out.print("Enter last name (MAX 32 CHAR): ");
+			String input = in.readLine();
+			while(input.length() > 32 || input.length() == 0) {
+				System.out.print("Invalid entry. Enter last name (MAX 32 CHAR): ");
+				input = in.readLine();
+			}
+			String lname = input;
+			
+			String query = "Select id, fname, lname from Customer where lname='";
+			query += lname;
+			query += "'";
+			
+			esql.executeQueryAndPrintResult(query);
+			
+			System.out.print("Would you like to add a new customer?(y/n)");
+			input = in.readLine();
+			if(input.equals("y")){
+				System.out.print("Adding customer.\n");
+				AddCustomer(esql);
+			}
+			
+			System.out.print("Enter id of customer you wish to initiate a service request for: ");
+			input = in.readLine();
+			while(!isInteger(input) || input.length() == 0) {
+				System.out.print("Invalid entry. Enter id of customer you wish to initiate a service request for: ");
+				input = in.readLine();
+			}
+			String cid = input;
+			query = "Select car_vin from Owns where customer_id=" + cid;
+			
+			esql.executeQueryAndPrintResult(query);
+			
+			System.out.print("Would you like to initiate a service request for one of these cars?(y/n)");
+			input = in.readLine();
+			String choice = input;
+			if(choice.equals("y")){
+				System.out.print("Enter VIN: ");
+				input = in.readLine();
+				while(input.length() != 16) {
+					System.out.print("Invalid entry. VIN is 11-17 characters (pre 1981) or 17 characters (post 1981). But apparently for this project it's exactly 16 characters. Enter VIN: ");
+					input = in.readLine();
+				}
+				String car_vin = input;
+				String timeStamp = new SimpleDateFormat("MM/dd/yyyy HH:mm").format(Calendar.getInstance().getTime());
+				System.out.print("Using timestamp " + timeStamp + "\n");
+				
+				System.out.print("Enter odometer: ");
+				input = in.readLine();
+				while(!isInteger(input) || input.length() == 0) {
+					System.out.print("Invalid entry. Enter odometer: ");
+					input = in.readLine();
+				}
+				String odometer = input;
+				
+				System.out.print("Enter complaint: ");
+				input = in.readLine();
+				while(input.length() == 0) {
+					System.out.print("Invalid entry. Enter complaint: ");
+					input = in.readLine();
+				}
+				String complaint = input;
+				
+				query = "Insert into Service_Request values(";
+				query += getRequestID();
+				query += ", '";
+				query += cid;
+				query += "', '";
+				query += car_vin;
+				query += "', '";
+				query += timeStamp;
+				query += "', '";
+				query += odometer;
+				query += "', '";
+				query += complaint;
+				query += "'";
+			}
+			else{
+				System.out.print("Inserting new car.\n");
+				AddCar(esql);
+			}
+		}
+		catch(Exception e) {
+			System.err.println(e.getMessage());
+		}
 	}
 	
 	public static void CloseServiceRequest(MechanicShop esql) throws Exception{//5
@@ -401,7 +530,16 @@ public class MechanicShop{
 	}
 	
 	public static void ListCustomersWithBillLessThan100(MechanicShop esql){//6
-		
+		try{			
+			String query = "";
+			query += "SELECT cu.fname, cu.lname, c.date, c.comment, c.bill ";
+			query += "FROM Closed_Request c, Customer cu, Service_Request r ";	
+			query += "WHERE c.bill < 100 AND c.rid=r.rid AND r.customer_id=cu.id;";		
+			esql.executeQueryAndPrintResult(query);
+		}
+		catch (Exception e) {
+			System.err.println(e.getMessage());
+		}
 	}
 	
 	public static void ListCustomersWithMoreThan20Cars(MechanicShop esql){//7
@@ -409,7 +547,16 @@ public class MechanicShop{
 	}
 	
 	public static void ListCarsBefore1995With50000Milles(MechanicShop esql){//8
-		
+		try{			
+			String query = "";
+			query += "SELECT c.make, c.model, c.year, s.odometer ";
+			query += "FROM Car c, Service_Request s ";	
+			query += "WHERE c.year < 1995 AND c.vin=s.car_vin AND odometer < 50000 ORDER BY c.year;";		
+			esql.executeQueryAndPrintResult(query);
+		}
+		catch (Exception e) {
+			System.err.println(e.getMessage());
+		}
 	}
 	
 	public static void ListKCarsWithTheMostServices(MechanicShop esql){//9
@@ -417,9 +564,17 @@ public class MechanicShop{
 		
 	}
 	
-	public static void ListCustomersInDescendingOrderOfTheirTotalBill(MechanicShop esql){//9
-		//
-		
+	public static void ListCustomersInDescendingOrderOfTheirTotalBill(MechanicShop esql){//10
+		try{
+		    String query = "";
+		    query += "SELECT c.fname , c.lname, tb ";
+		    query += "FROM Customer c, ";
+		    query += "(SELECT s.customer_id, SUM(cl.bill) tb FROM Service_Request s, Closed_Request cl WHERE s.rid=cl.rid GROUP BY s.customer_id) te ";
+		    query += "WHERE c.id=te.customer_id ORDER BY te.tb DESC;";
+			esql.executeQueryAndPrintResult(query);
+		} catch(Exception e) {
+			System.err.println(e.getMessage());
+		}
 	}
 	
 }
